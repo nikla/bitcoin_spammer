@@ -1,0 +1,20 @@
+Wallet ID: {{walletId}}
+Balance: {{ balance }}
+Address: {{ address}}
+<br>
+{{qrcode}}
+
+<br>
+
+<form action="/" method="post">
+	{{ form.as_p}}
+	<input type="submit" value="Use old wallet"/>
+</form>
+
+<form action="/" method="post">
+	<input type="submit" value="Create new wallet"/>
+</form>
+<form action="/" method="post">
+	<input type="hidden" value="{{walletId}}" name="walletId"/>
+	<input type="submit" value="Refresh wallet balance"/>
+</form>
