@@ -1,20 +1,141 @@
-Wallet ID: {{walletId}}
-Balance: {{ balance }}
-Address: {{ address}}
-<br>
-{{qrcode}}
+<!doctype html>
+<html>
+	<head>
+		<link rel="stylesheet" href="/static/bootstrap/css/bootstrap.css">
+		<link rel="stylesheet" href="/static/bootstrap/css/bootstrap-responsive.css">
+		<style type="text/css">
+			body {
+				padding-top: 40px;
+				padding-bottom: 40px;
 
-<br>
+				}
+			
+			p.mailaddress {
+				back
+				}
+			i.icon-remove-sign {
+				float:right;
+				}
+			div.label {
+				margin:2px;
+			}
 
-<form action="/" method="post">
-	{{ form.as_p}}
-	<input type="submit" value="Use old wallet"/>
-</form>
+		</style>
+		<script type="text/javascript" src="/static/jquery-1.7.2.min.js"></script>
+	</head>
+<body>
+<div class="container hero-unit">
+	<div>
+		<h1>Spread your bitcoins</h1>
+		<p>This is experimental app to spread bitcoins using <a href="https://easywallet.org/fi/api">easywallet.org API.</a>
+		Please use this app with caution.</p>
+	</div>
+	<div class="row">
+		<div class="span12" >
+			
+				
+					<div class="form-inline">
+						<p>Wallet id: </p>
+						<input id="wallet_id_form" type="text" 
+						placeholder="Your easywallet.org id here...">
+						<button type="submit" id="refresh_wallet">Refresh</button>
+						<div style="margin-top:20px;"><p class="balance">Balance: 0 BC</p></div>
+					</div>
+				
+			
+		
+		
+		
+		</div>
+	</div>
+	<div class="row">
+		<div class="span12">
+			<div id="mailform" class="form-inline">
+				<input id="email" type="text" placeholder="e-mail recipient">
+				<button id ="add_mail" type="submit" class="btn btn-secondary">
+					<i class="icon-envelope"></i>
+				Add email to list
+				</button>
+			</div>
+		</div>
+	</div>
+	<div class="row">
+		<div class="span12">
+			<div>
+				<p id="recipients">Recipients: 0</p>
+			</div>
+		</div>
+	</div>
 
-<form action="/" method="post">
-	<input type="submit" value="Create new wallet"/>
-</form>
-<form action="/" method="post">
-	<input type="hidden" value="{{walletId}}" name="walletId"/>
-	<input type="submit" value="Refresh wallet balance"/>
-</form>
+	
+	
+	<script src="static/jquery-1.7.2.min.js"></script>
+		<script>
+		$(function(){
+			$("#add_mail").click( function(){
+				
+				if ($('#email').val() != "") {
+					var d = '<div class="eadress label label-info">' 
+					d+=$('#email').val();
+					d+='<i class="removeicon"></i></div>';
+					$('#recipients').after(d);
+					$('#mailform').removeClass("error");
+					$('#mailform').addClass("control-group success");
+					$('#mailform').removeClass("success");
+					$('#email').val('');
+					updateRecipients();
+				} else {
+					$('#mailform').addClass("control-group error");
+					$('#mailform').removeClass("success");
+				}
+				
+			}).on("click", hoveri);
+
+			
+		});
+
+		function hoveri() {
+			$("div.eadress").hover(
+				function () {
+					$(this).removeClass("label-info");
+				//	$(this).children('.removeicon').addClass("icon-remove-sign");
+				},
+				function () {
+					$(this).addClass("label-info");
+				//	$(this).children('.removeicon').removeClass("icon-remove-sign");
+				}
+			).on("hover", removemail);
+			
+			
+		}
+		function removemail() {
+			$("div.label").click(
+				function () {
+					$(this).remove();
+					updateRecipients();
+				}
+			);
+		}
+		function updateRecipients() {
+			var n = $("div.eadress").length;
+			$('#recipients').text("Recipients: " + n);
+		}
+
+		$("#refresh_wallet").click(
+			function() {
+				var walletid = $('#wallet_id_form').val();
+				var url = "https://easywallet.org/api/v1/w/"+ walletid+  "/address";
+				$.post('', {walletId: walletid}, function(data){
+					var obj = jQuery.parseJSON(data);
+					$("p.balance").text("Balance: " + obj.balance+ " BC");
+				});
+			}
+		);
+		
+		</script>
+		
+	<br>
+	
+</div>
+	</body>
+</html>

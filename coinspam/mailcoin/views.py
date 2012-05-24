@@ -1,8 +1,9 @@
 # Create your views here.
-from mailcoin.models import WalletApi, WalletForm
+from mailcoin.models import WalletApi, WalletForm, sendModel, EmailForm
 from django.shortcuts import render_to_response
 from django.views.decorators.csrf import csrf_exempt
 import httplib
+from django.http import HttpResponse
 import json
 from decimal import *
 import urllib
@@ -14,6 +15,7 @@ from django.utils.safestring import mark_safe
 @csrf_exempt
 def index(request):
 	form = WalletForm()
+	eForm = EmailForm()
 	if request.method == 'POST':
 		try:
 			walletId = request.POST['walletId']
@@ -21,29 +23,39 @@ def index(request):
 			hinta = str(Balance) + " BC"
 			address = getAddress(walletId)
 			addressqr = qrcode(address)
-			return render_to_response('coinspam/index.html', {
-				'form': form,
-				'walletId': walletId,
-				'balance': Balance,
-				'address': address,
-				'qrcode': addressqr,
-			})
+			return HttpResponse(json.dumps({"walletid":walletId,"balance": float(Balance)}))
+			#~ return HttpResponse(json.dumps(response_data), 
+				#~ mimetype="application/json")
+			#~ return render_to_response('coinspam/index.html', {
+				#~ 'form': form,
+				#~ 'walletId': walletId,
+				#~ 'balance': Balance,
+				#~ 'address': address,
+				#~ 'qrcode': addressqr,
+				#~ 'emailform': eForm,
+			#~ })
 			
 		except (KeyError):
 			walletId = CreateNewWallet()
 			Balance = UseOldWallet (walletId)
 			address = getAddress(walletId)
+			addressqr = qrcode(address)
 			return render_to_response('coinspam/index.html', {
 				'form': form,
 				'walletId': walletId,
 				'balance': float(Balance),
 				'address': address,
+				'emailform': eForm,
+				'qrcode': addressqr,
 			})
 		return render_to_response('coinspam/index.html')
 	return render_to_response('coinspam/index.html', {
 		'form': form,
+		'emailform': eForm,
 	})
 
+
+#~ def parse
 
 
 def CreateNewWallet():
