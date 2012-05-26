@@ -18,7 +18,7 @@ def index(request):
 	eForm = EmailForm()
 	if request.method == 'POST':
 		try:
-			walletId = request.POST['walletId']
+			walletId = request.POST['walletid']
 			Balance = UseOldWallet (walletId)
 			hinta = str(Balance) + " BC"
 			address = getAddress(walletId)
@@ -40,23 +40,38 @@ def index(request):
 			Balance = UseOldWallet (walletId)
 			address = getAddress(walletId)
 			addressqr = qrcode(address)
-			return render_to_response('coinspam/index.html', {
-				'form': form,
-				'walletId': walletId,
-				'balance': float(Balance),
-				'address': address,
-				'emailform': eForm,
-				'qrcode': addressqr,
-			})
+			return HttpResponse(json.dumps({"walletid":walletId,"balance": float(Balance)}))
 		return render_to_response('coinspam/index.html')
 	return render_to_response('coinspam/index.html', {
 		'form': form,
 		'emailform': eForm,
 	})
 
-
+@csrf_exempt
+def sendcoins(request):
+	if request.method == 'POST':
+		try:
+			email = request.POST['email']
+			amount = request.POST['amount']
+			walletid = request.POST['walletid']
+			vastaus = SendPaymentToMail(email, walletid, amount)
+			return HttpResponse(json.dumps({"successful" : vastaus}))
+		except (KeyError):
+			return HttpResponse(json.dumps({"successful" : False}))
+	else:
+		return HttpResponse(json.dumps({"successful" : False}))
+		
+		
 #~ def parse
-
+def SendPaymentToMail(email, walletid, amount):
+	parameters = urllib.urlencode({'address': email,'amount': amount })
+	headers = {"Content-type": "application/x-www-form-urlencoded","Accept": "text/plain"}
+	paymentRequest = httplib.HTTPSConnection("easywallet.org")
+	paymentRequest.request("POST", "/api/v1/w/"+ walletid + "/payment", parameters, headers)
+	response = paymentRequest.getresponse().read()
+	paymentRequest.close()
+	return json.loads(response)
+	
 
 def CreateNewWallet():
 	newWalletRequest = httplib.HTTPSConnection("easywallet.org")

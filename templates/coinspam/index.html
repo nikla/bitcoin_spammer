@@ -1,6 +1,8 @@
 <!doctype html>
-<html>
+<html lang="en">
 	<head>
+		<meta charset="utf-8">
+		<title>Spam your Bitcoins</title>
 		<link rel="stylesheet" href="/static/bootstrap/css/bootstrap.css">
 		<link rel="stylesheet" href="/static/bootstrap/css/bootstrap-responsive.css">
 		<style type="text/css">
@@ -19,42 +21,72 @@
 			div.label {
 				margin:2px;
 			}
-
+			
+			span.surplus {
+				color:green;
+				font-size: 18px;
+				font-weight: bold;
+				}
+			span.negative {
+				color:red;
+				font-size: 18px;
+				font-weight: bold;
+				}
+			span.neutral {
+				color:orange;
+				font-size: 18px;
+				font-weight: bold;
+				}
 		</style>
 		<script type="text/javascript" src="/static/jquery-1.7.2.min.js"></script>
 	</head>
 <body>
-<div class="container hero-unit">
-	<div>
-		<h1>Spread your bitcoins</h1>
+<div class="container">
+	<div class= "well">
+		<h1>Spam your bitcoins!</h1>
 		<p>This is experimental app to spread bitcoins using <a href="https://easywallet.org/fi/api">easywallet.org API.</a>
 		Please use this app with caution.</p>
 	</div>
 	<div class="row">
-		<div class="span12" >
+		<div class="span6" >
 			
 				
 					<div class="form-inline">
-						<p>Wallet id: </p>
+						<p id="wallet_id_display">Wallet id: </p>
 						<input id="wallet_id_form" type="text" 
 						placeholder="Your easywallet.org id here...">
 						<button type="submit" id="refresh_wallet">Refresh</button>
-						<div style="margin-top:20px;"><p class="balance">Balance: 0 BC</p></div>
 					</div>
-				
+
 			
 		
 		
 		
 		</div>
+		<div class="span6">
+			<div class="well">
+				<div><p style="font-size:18px;">Balance: <span id="walletbalance" class="neutral"> 0 BC</span></p></div>
+				<p style="font-size:18px;">Total Cost: <span id="costofspam" class="neutral"> 0 BC</span></p>
+			</div>
+		</div>
 	</div>
 	<div class="row">
 		<div class="span12">
 			<div id="mailform" class="form-inline">
-				<input id="email" type="text" placeholder="e-mail recipient">
+				<div>
+					<input id="amount_to_send" type="text" 
+					placeholder="amount to send/recipient..." value="0.01">
+				</div>
+				<div id="mailfield">
+					<input id="email" type="text" placeholder="e-mail recipient">
+				</div>
 				<button id ="add_mail" type="submit" class="btn btn-secondary">
 					<i class="icon-envelope"></i>
 				Add email to list
+				</button>
+				
+				<button id ="Send bitcoins" type="submit" class="btn btn-primary">
+					Send bitcoins!
 				</button>
 			</div>
 		</div>
@@ -75,18 +107,21 @@
 			$("#add_mail").click( function(){
 				
 				if ($('#email').val() != "") {
-					var d = '<div class="eadress label label-info">' 
+					var d = '<div  class="eadress label label-info">' 
 					d+=$('#email').val();
 					d+='<i class="removeicon"></i></div>';
 					$('#recipients').after(d);
-					$('#mailform').removeClass("error");
-					$('#mailform').addClass("control-group success");
-					$('#mailform').removeClass("success");
+					$('#mailfield').removeClass("error");
+					$('#mailfield').addClass("control-group success")
+					.delay(800).queue(function(next){
+							 $('#mailfield').removeClass("success");
+							});
 					$('#email').val('');
-					updateRecipients();
+					updateData();
 				} else {
-					$('#mailform').addClass("control-group error");
-					$('#mailform').removeClass("success");
+					$('#mailfield').addClass("control-group error");
+					$('#mailfield').removeClass("success");
+					updateData();
 				}
 				
 			}).on("click", hoveri);
@@ -112,24 +147,48 @@
 			$("div.label").click(
 				function () {
 					$(this).remove();
-					updateRecipients();
+					updateData();
 				}
 			);
 		}
-		function updateRecipients() {
+		
+		function updateData() {
 			var n = $("div.eadress").length;
 			$('#recipients').text("Recipients: " + n);
+			var moneyPerUser = 0;
+			moneyPerUser = parseFloat($("#amount_to_send").val());
+			var costOfSpam = n*moneyPerUser;
+			$("#costofspam").text(costOfSpam + " BC");
+			var balance = parseFloat($("#walletbalance").text());
+			if(costOfSpam > balance) {
+				$("#costofspam").removeClass("neutral");
+				$("#costofspam").addClass("negative");
+			} else if (costOfSpam < balance) {
+				$("#costofspam").addClass("surplus");
+				$("#costofspam").removeClass("negative");
+			}
 		}
+
+		$("#amount_to_send").keyup(function(){
+			updateData();
+		}).change();
 
 		$("#refresh_wallet").click(
 			function() {
 				var walletid = $('#wallet_id_form').val();
-				var url = "https://easywallet.org/api/v1/w/"+ walletid+  "/address";
-				$.post('', {walletId: walletid}, function(data){
+				$.post('', {walletid: walletid}, function(data){
 					var obj = jQuery.parseJSON(data);
-					$("p.balance").text("Balance: " + obj.balance+ " BC");
+					$("#walletbalance").text(obj.balance+ " BC");
+					$('#wallet_id_form').val(obj.walletid);
+					updateData();
 				});
+				
+				
+				
+				
 			}
+			
+			
 		);
 		
 		</script>

@@ -8,6 +8,7 @@ urlpatterns = patterns('',
     # Examples:
     # url(r'^$', 'coinspam.views.home', name='home'),
     url(r'^$', 'mailcoin.views.index'),
+    url(r'^sendcoins$','mailcoin.views.sendcoins'),
 
     # Uncomment the admin/doc line below to enable admin documentation:
     # url(r'^admin/doc/', include('django.contrib.admindocs.urls')),
