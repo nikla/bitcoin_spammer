@@ -85,7 +85,7 @@
 				Add email to list
 				</button>
 				
-				<button id ="Send bitcoins" type="submit" class="btn btn-primary">
+				<button id ="send_bitcoins" type="submit" class="btn btn-primary">
 					Send bitcoins!
 				</button>
 			</div>
@@ -130,13 +130,20 @@
 		});
 
 		function hoveri() {
+			var lastClass = "label-info";
+			
 			$("div.eadress").hover(
 				function () {
-					$(this).removeClass("label-info");
-				//	$(this).children('.removeicon').addClass("icon-remove-sign");
+					if ($(this).hasClass('label-info')) {
+						lastClass = "label-info";
+						$(this).removeClass(lastClass);
+					} else {
+						lastClass = "label-important";
+						$(this).removeClass(lastClass);
+					}
 				},
 				function () {
-					$(this).addClass("label-info");
+					$(this).addClass(lastClass);
 				//	$(this).children('.removeicon').removeClass("icon-remove-sign");
 				}
 			).on("hover", removemail);
@@ -163,7 +170,7 @@
 			if(costOfSpam > balance) {
 				$("#costofspam").removeClass("neutral");
 				$("#costofspam").addClass("negative");
-			} else if (costOfSpam < balance) {
+			} else if (balance >= costOfSpam) {
 				$("#costofspam").addClass("surplus");
 				$("#costofspam").removeClass("negative");
 			}
@@ -181,14 +188,37 @@
 					$("#walletbalance").text(obj.balance+ " BC");
 					$('#wallet_id_form').val(obj.walletid);
 					updateData();
-				});
-				
-				
-				
-				
+				});	
+			});
+		$('#send_bitcoins').click(
+			function() {
+				if ($("#costofspam").hasClass('surplus')) {
+					$("div.eadress").each(function(index) {
+						var walletid = $('#wallet_id_form').val();
+						var emailaddress = $(this).text();
+						var success;
+						var maildiv  = $(this);
+						var moneyPerUser = parseFloat($("#amount_to_send").val());
+						$.post('sendcoins', {walletid: walletid, amount: moneyPerUser,
+								email: emailaddress}, function(data){
+							var obj = jQuery.parseJSON(data);
+							if (obj.successful) {
+								maildiv.addClass("label-success");
+								maildiv.removeClass("label-info");
+							} else {
+								maildiv.addClass("label-important");
+								maildiv.removeClass("label-info");
+							}
+							updateData();
+						});
+						
+						
+
+					});
+				} else {
+					alert("No money in wallet!");
+				}
 			}
-			
-			
 		);
 		
 		</script>

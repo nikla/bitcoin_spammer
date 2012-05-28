@@ -55,7 +55,7 @@ def sendcoins(request):
 			amount = request.POST['amount']
 			walletid = request.POST['walletid']
 			vastaus = SendPaymentToMail(email, walletid, amount)
-			return HttpResponse(json.dumps({"successful" : vastaus}))
+			return HttpResponse(json.dumps(vastaus))
 		except (KeyError):
 			return HttpResponse(json.dumps({"successful" : False}))
 	else:
