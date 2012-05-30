@@ -44,18 +44,24 @@
 <div class="container">
 	<div class= "well">
 		<h1>Spam your bitcoins!</h1>
-		<p>This is experimental app to spread bitcoins using <a href="https://easywallet.org/fi/api">easywallet.org API.</a>
-		Please use this app with caution.</p>
+			<p>This is experimental app to spam bitcoins via email using 
+				<a href="https://easywallet.org/fi/api">
+				<img style="height:25px;" src="https://easywallet.org/static/img/logo-medium.png"></a>
+		API. Please use this app with caution. If you want to use this app,
+		 it is strongly recommended to create new wallet for that purpose.</p>
+		<p>You can find the source code of the project from 
+		<a href="https://github.com/nikla/bitcoin_spammer"> GitHub, </a>
+		and check how the API is used.</p>
 	</div>
 	<div class="row">
 		<div class="span6" >
 			
 				
-					<div class="form-inline">
-						<p id="wallet_id_display">Wallet id: </p>
+					<div class="form-inline well">
+						<h3 id="wallet_id_display">Wallet id: </h3>
 						<input id="wallet_id_form" type="text" 
 						placeholder="Your easywallet.org id here...">
-						<button type="submit" id="refresh_wallet">Refresh</button>
+						<button type="submit" class="btn" id="refresh_wallet">Refresh</button>
 					</div>
 
 			
@@ -65,6 +71,7 @@
 		</div>
 		<div class="span6">
 			<div class="well">
+				<h3>Wallet info:</h3>
 				<div><p style="font-size:18px;">Balance: <span id="walletbalance" class="neutral"> 0 BC</span></p></div>
 				<p style="font-size:18px;">Total Cost: <span id="costofspam" class="neutral"> 0 BC</span></p>
 			</div>
@@ -72,12 +79,14 @@
 	</div>
 	<div class="row">
 		<div class="span12">
-			<div id="mailform" class="form-inline">
+			<div id="mailform" class="well">
 				<div>
+					<p>BC per recipient: <span class="">(0.01 BC minimum)</span></p>
 					<input id="amount_to_send" type="text" 
 					placeholder="amount to send/recipient..." value="0.01">
 				</div>
 				<div id="mailfield">
+					<p>Recipient e-mail address: <span class="">(Bitcoin addresses works as well)</span></p>
 					<input id="email" type="text" placeholder="e-mail recipient">
 				</div>
 				<button id ="add_mail" type="submit" class="btn btn-secondary">
@@ -93,7 +102,7 @@
 	</div>
 	<div class="row">
 		<div class="span12">
-			<div>
+			<div class = "well">
 				<p id="recipients">Recipients: 0</p>
 			</div>
 		</div>
@@ -103,13 +112,15 @@
 	
 	<script src="static/jquery-1.7.2.min.js"></script>
 		<script>
+			
+		// Function to add e-mails to list
 		$(function(){
 			$("#add_mail").click( function(){
 				
 				if ($('#email').val() != "") {
-					var d = '<div  class="eadress label label-info">' 
+					var d = '<div  class="eadress alert alert-info"><span>' 
 					d+=$('#email').val();
-					d+='<i class="removeicon"></i></div>';
+					d+='</span><button class="close">&times;</button></div>';
 					$('#recipients').after(d);
 					$('#mailfield').removeClass("error");
 					$('#mailfield').addClass("control-group success")
@@ -129,31 +140,36 @@
 			
 		});
 
+
 		function hoveri() {
-			var lastClass = "label-info";
+			var lastClass;
 			
 			$("div.eadress").hover(
 				function () {
-					if ($(this).hasClass('label-info')) {
-						lastClass = "label-info";
+					if ($(this).hasClass('alert-info')) {
+						lastClass = "alert-info";
 						$(this).removeClass(lastClass);
-					} else {
-						lastClass = "label-important";
+					} else if ($(this).hasClass('alert-error')) {
+						lastClass = "alert-error";
+						$(this).removeClass(lastClass);
+					} else if ($(this).hasClass('alert-success')) {
+						lastClass = "alert-success";
 						$(this).removeClass(lastClass);
 					}
 				},
 				function () {
 					$(this).addClass(lastClass);
-				//	$(this).children('.removeicon').removeClass("icon-remove-sign");
+					lastClass = "alert-info";
 				}
 			).on("hover", removemail);
 			
 			
 		}
 		function removemail() {
-			$("div.label").click(
+			$("div.alert > button").click(
 				function () {
-					$(this).remove();
+					
+					$(this).parent().remove();
 					updateData();
 				}
 			);
@@ -190,10 +206,11 @@
 					updateData();
 				});	
 			});
+			
 		$('#send_bitcoins').click(
 			function() {
 				if ($("#costofspam").hasClass('surplus')) {
-					$("div.eadress").each(function(index) {
+					$("div.eadress > span").each(function(index) {
 						var walletid = $('#wallet_id_form').val();
 						var emailaddress = $(this).text();
 						var success;
@@ -203,11 +220,13 @@
 								email: emailaddress}, function(data){
 							var obj = jQuery.parseJSON(data);
 							if (obj.successful) {
-								maildiv.addClass("label-success");
-								maildiv.removeClass("label-info");
+								maildiv.parent().addClass("alert-success");
+								maildiv.parent().removeClass("alert-info");
+								maildiv.parent().removeClass("alert-error");
 							} else {
-								maildiv.addClass("label-important");
-								maildiv.removeClass("label-info");
+								maildiv.parent().addClass("alert-error");
+								maildiv.parent().removeClass("alert-info");
+								maildiv.parent().removeClass("alert-success");
 							}
 							updateData();
 						});
