@@ -24,16 +24,6 @@ def index(request):
 			address = getAddress(walletId)
 			addressqr = qrcode(address)
 			return HttpResponse(json.dumps({"walletid":walletId,"balance": float(Balance)}))
-			#~ return HttpResponse(json.dumps(response_data), 
-				#~ mimetype="application/json")
-			#~ return render_to_response('coinspam/index.html', {
-				#~ 'form': form,
-				#~ 'walletId': walletId,
-				#~ 'balance': Balance,
-				#~ 'address': address,
-				#~ 'qrcode': addressqr,
-				#~ 'emailform': eForm,
-			#~ })
 			
 		except (KeyError):
 			walletId = CreateNewWallet()
@@ -54,17 +44,32 @@ def sendcoins(request):
 			email = request.POST['email']
 			amount = request.POST['amount']
 			walletid = request.POST['walletid']
-			vastaus = SendPaymentToMail(email, walletid, amount)
+			message = request.POST['email_msg']
+			email_from = request.POST['email_from']
+			vastaus = SendPaymentToMail(email, walletid, amount, message, email_from)
 			return HttpResponse(json.dumps(vastaus))
 		except (KeyError):
 			return HttpResponse(json.dumps({"successful" : False}))
 	else:
 		return HttpResponse(json.dumps({"successful" : False}))
 		
-		
-#~ def parse
-def SendPaymentToMail(email, walletid, amount):
-	parameters = urllib.urlencode({'address': email,'amount': amount })
+#########################################################################
+#~ SendPaymentToMail													#
+#~ 	-Python Function which actually makes the POST request to 			#
+#~ 	-Easywallet.org API													#
+#########################################################################
+#~ params:																#
+#########################################################################
+#~ email = email address of the recipient								#
+#~ walletid = Easywallet wallet id of the sender 						#
+#~    i.e. (rest of the url Easywallet.org/w/<WALLET_ID>)				#
+#~ amount = amount of bitcoins to send									#
+#~ message = Message of the email										#
+#~ email_from = Optional e-mail address of the sender					#
+#########################################################################
+def SendPaymentToMail(email, walletid, amount, message, email_from):
+	parameters = urllib.urlencode({'address': email,'amount': amount, 'email_from': email_from, 'email_msg': message })
+	
 	headers = {"Content-type": "application/x-www-form-urlencoded","Accept": "text/plain"}
 	paymentRequest = httplib.HTTPSConnection("easywallet.org")
 	paymentRequest.request("POST", "/api/v1/w/"+ walletid + "/payment", parameters, headers)

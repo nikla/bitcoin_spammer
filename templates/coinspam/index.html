@@ -4,7 +4,7 @@
 		<meta charset="utf-8">
 		<title>Spam your Bitcoins</title>
 		<link rel="stylesheet" href="/static/bootstrap/css/bootstrap.css">
-		<link rel="stylesheet" href="/static/bootstrap/css/bootstrap-responsive.css">
+		
 		<style type="text/css">
 			body {
 				padding-top: 40px;
@@ -37,7 +37,12 @@
 				font-size: 18px;
 				font-weight: bold;
 				}
+			button#send_bitcoins {
+				width:220px;
+				height:50px;
+			}
 		</style>
+		<link rel="stylesheet" href="/static/bootstrap/css/bootstrap-responsive.css">
 		<script type="text/javascript" src="/static/jquery-1.7.2.min.js"></script>
 	</head>
 <body>
@@ -69,7 +74,7 @@
 		
 		
 		</div>
-		<div class="span6">
+		<div class="span">
 			<div class="well">
 				<h3>Wallet info:</h3>
 				<div><p style="font-size:18px;">Balance: <span id="walletbalance" class="neutral"> 0 BC</span></p></div>
@@ -78,28 +83,44 @@
 		</div>
 	</div>
 	<div class="row">
-		<div class="span12">
-			<div id="mailform" class="well">
-				<div>
-					<p>BC per recipient: <span class="">(0.01 BC minimum)</span></p>
-					<input id="amount_to_send" type="text" 
-					placeholder="amount to send/recipient..." value="0.01">
+		<div class="well span" id="mailform">
+			<div class="row">
+				<div class="span4">
+					<div>
+						<p>BC per recipient: <span class="">(0.01 BC minimum)</span></p>
+						<input id="amount_to_send" type="text" 
+						placeholder="amount to send/recipient..." value="0.01">
+					</div>
+					<div id="mailfield" class="control-group">
+						<p>Recipient e-mail address: <span class=""></span></p>
+						<input id="email" type="text" placeholder="e-mail recipient">
+					</div>
+					<button id ="add_mail" type="submit" class="btn btn-secondary">
+						<i class="icon-envelope"></i>
+					Add email to list
+					</button>
 				</div>
-				<div id="mailfield">
-					<p>Recipient e-mail address: <span class=""></span></p>
-					<input id="email" type="text" placeholder="e-mail recipient">
-				</div>
-				<button id ="add_mail" type="submit" class="btn btn-secondary">
-					<i class="icon-envelope"></i>
-				Add email to list
-				</button>
 				
-				<button id ="send_bitcoins" type="submit" class="btn btn-primary">
-					Send bitcoins!
-				</button>
+				<div class="span4">
+					<p>From:</p>
+					<input type="text" id="mailfrom" placeholder="Your e-mail address">
+					<p>Message:</p>
+					<textarea id="message" cols="40" rows="3" name="msg">Hi! Someone has sent you a bunch of bitcoins with bitcoinspammer!
+					</textarea>
+					
+				</div>
+
+			</div>
+			<div class="row">
+				<div class="span4" style="padding-top:20px;">
+					<button id ="send_bitcoins" type="submit" class="btn btn-primary">
+						Send bitcoins!
+					</button>
+				</div>
 			</div>
 		</div>
 	</div>
+
 	<div class="row">
 		<div class="span12">
 			<div class = "well">
@@ -122,9 +143,8 @@
 					d+=$('#email').val();
 					d+='</span><button class="close">&times;</button></div>';
 					$('#recipients').after(d);
-					$('#mailfield').removeClass("error");
-					$('#mailfield').addClass("control-group success")
-					.delay(800).queue(function(next){
+					$('#mailfield').removeClass("error success");
+					$('#mailfield').addClass("success").delay(800).queue(function(next){
 							 $('#mailfield').removeClass("success");
 							});
 					$('#email').val('');
@@ -216,8 +236,10 @@
 						var success;
 						var maildiv  = $(this);
 						var moneyPerUser = parseFloat($("#amount_to_send").val());
+						var email_from = $("#mailfrom").val();
+						var msg = $("#message").val();
 						$.post('sendcoins', {walletid: walletid, amount: moneyPerUser,
-								email: emailaddress}, function(data){
+								email: emailaddress, email_from:email_from, email_msg:msg}, function(data){
 							var obj = jQuery.parseJSON(data);
 							if (obj.successful) {
 								maildiv.parent().addClass("alert-success");
