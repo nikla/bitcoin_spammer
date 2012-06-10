@@ -14,8 +14,17 @@ framework.
 
 """
 import os
+import site
+import sys
+
+site.addsitedir('/home/nikolaus/.virtualenvs/bitcoinspam/lib/python2.7/site-packages')
+
+
 
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "coinspam.settings")
+
+
+sys.path.append('/home/nikolaus/Asiakirjat/projects/bitcoin_spammer/coinspam')
 
 # This application object is used by any WSGI server configured to use this
 # file. This includes Django's development server, if the WSGI_APPLICATION
